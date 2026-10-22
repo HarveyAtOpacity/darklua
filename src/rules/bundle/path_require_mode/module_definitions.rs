@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::path::{Path, PathBuf};
 
 use indexmap::IndexMap;
@@ -161,6 +162,11 @@ impl BuildModuleDefinitions {
 
     pub(crate) fn apply(mut self, block: &mut Block, context: &Context) {
         if self.module_definitions.is_empty() {
+            context.add_bundle_source_range(
+                context.current_path().to_path_buf(),
+                1,
+                lines::block_total(block),
+            );
             return;
         }
 
@@ -178,10 +184,26 @@ impl BuildModuleDefinitions {
 
             ShiftTokenLine::new(shift_lines).flawless_process(&mut module.block, context);
 
+            if inserted_lines > 0 {
+                let start_line = usize::try_from(shift_lines).unwrap_or(0) + 1;
+                context.add_bundle_source_range(
+                    module.path.clone(),
+                    start_line,
+                    start_line + inserted_lines - 1,
+                );
+            }
+
             shift_lines += inserted_lines as isize;
         }
 
+        let main_lines = lines::block_total(block);
         ShiftTokenLine::new(shift_lines).flawless_process(block, context);
+        let main_start_line = usize::try_from(shift_lines).unwrap_or(0) + 1;
+        context.add_bundle_source_range(
+            context.current_path().to_path_buf(),
+            main_start_line,
+            main_start_line + main_lines.saturating_sub(1),
+        );
 
         let statements = self
             .module_definitions
