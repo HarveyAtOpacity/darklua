@@ -150,7 +150,8 @@ pub struct BundleSourceRange {
     pub path: PathBuf,
     /// The bundle line that holds line 1 of the file.
     pub start_line: usize,
-    /// The bundle line that holds the last line of the file.
+    /// The bundle line that holds the last line of the file. A trailing newline in the file
+    /// counts as one more line, so this can be the line right after the last text line.
     pub end_line: usize,
 }
 
@@ -193,7 +194,12 @@ impl Context<'_, '_, '_> {
     }
 
     /// Records where the lines of a bundled file sit in the bundle output.
-    pub fn add_bundle_source_range(&self, path: PathBuf, start_line: usize, end_line: usize) {
+    pub(crate) fn add_bundle_source_range(
+        &self,
+        path: PathBuf,
+        start_line: usize,
+        end_line: usize,
+    ) {
         if let Ok(mut ranges) = self.bundle_source_ranges.try_borrow_mut() {
             ranges.push(BundleSourceRange {
                 path,
@@ -206,7 +212,7 @@ impl Context<'_, '_, '_> {
     }
 
     /// Takes the recorded bundle source ranges out of the context.
-    pub fn take_bundle_source_ranges(&self) -> Vec<BundleSourceRange> {
+    pub(crate) fn take_bundle_source_ranges(&self) -> Vec<BundleSourceRange> {
         self.bundle_source_ranges.take()
     }
 

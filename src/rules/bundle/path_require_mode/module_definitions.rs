@@ -41,6 +41,10 @@ impl ModuleDefinition {
 
 const BUNDLE_MODULES_VARIABLE_CACHE_FIELD: &str = "cache";
 
+fn bundle_line_after(shift_lines: isize) -> usize {
+    usize::try_from(shift_lines).expect("bundle line shift must not be negative") + 1
+}
+
 impl BuildModuleDefinitions {
     pub(crate) fn new(modules_identifier: impl Into<String>) -> Self {
         let modules_identifier = modules_identifier.into();
@@ -185,7 +189,7 @@ impl BuildModuleDefinitions {
             ShiftTokenLine::new(shift_lines).flawless_process(&mut module.block, context);
 
             if inserted_lines > 0 {
-                let start_line = usize::try_from(shift_lines).unwrap_or(0) + 1;
+                let start_line = bundle_line_after(shift_lines);
                 context.add_bundle_source_range(
                     module.path.clone(),
                     start_line,
@@ -198,7 +202,7 @@ impl BuildModuleDefinitions {
 
         let main_lines = lines::block_total(block);
         ShiftTokenLine::new(shift_lines).flawless_process(block, context);
-        let main_start_line = usize::try_from(shift_lines).unwrap_or(0) + 1;
+        let main_start_line = bundle_line_after(shift_lines);
         context.add_bundle_source_range(
             context.current_path().to_path_buf(),
             main_start_line,

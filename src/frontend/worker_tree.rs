@@ -280,6 +280,8 @@ impl WorkerTree {
     }
 
     /// Returns, for each source file, where the lines of every bundled file sit in its output.
+    ///
+    /// A bundled file without any token has no range, so a missing path is not an error.
     pub fn iter_bundle_source_ranges(&self) -> impl Iterator<Item = (&Path, &[BundleSourceRange])> {
         self.graph.node_weights().map(|work_item| {
             (

@@ -6,6 +6,8 @@
 * export `ScopedHashMap` from the library
 * make `RequirePathLocator` and `PathLocator` public
 * make `PathRequireMode::initialize()` public
+* expose where each bundled file sits in the bundle output (`BundleSourceRange`, `WorkerTree::iter_bundle_source_ranges()`)
+* fix string literal keys in table types being shifted twice by `ShiftTokenLine` when bundling with `retain_lines`
 
 ## 0.17.3
 
